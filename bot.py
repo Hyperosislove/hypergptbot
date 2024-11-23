@@ -13,11 +13,15 @@ API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Check if all required environment variables are set
+if not BOT_TOKEN or not API_ID or not API_HASH or not OPENAI_API_KEY:
+    raise ValueError("Missing required environment variables.")
+
 # Set the OpenAI API key
 openai.api_key = OPENAI_API_KEY
 
-# Initialize Telegram bot client with time synchronization enabled
-bot = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, sync_time=True)
+# Initialize Telegram bot client
+bot = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Store user conversations in memory (or use a database for production)
 user_conversations = {}
