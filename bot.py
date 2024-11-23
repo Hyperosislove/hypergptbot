@@ -2,13 +2,9 @@ import os
 import openai
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from dotenv import load_dotenv
 import logging
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Set up logging
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 
 # Fetch sensitive info from environment variables
@@ -20,30 +16,35 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Set the OpenAI API key
 openai.api_key = OPENAI_API_KEY
 
-# Initialize Telegram bot client
-bot = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+# Initialize Telegram bot client with time synchronization enabled
+bot = Client("chatgpt_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN, sync_time=True)
 
-# Store user conversations in memory (can use a database in production)
+# Store user conversations in memory (or use a database for production)
 user_conversations = {}
 
 # Function to get GPT-3/4 response and maintain conversation context
 async def get_gpt_response(user_id, query):
+    # Check if user has a conversation history
     conversation_history = user_conversations.get(user_id, [])
+    
+    # Append user's query to the conversation history
     conversation_history.append({"role": "user", "content": query})
     
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4",  # You can use "gpt-3.5-turbo" for lower cost
             messages=conversation_history,
             max_tokens=150,
-            temperature=0.7
+            temperature=0.7  # Adjust for randomness (0-1 range)
         )
-        
+
+        # Get the assistant's response and append it to the conversation history
         assistant_reply = response.choices[0].message["content"].strip()
         conversation_history.append({"role": "assistant", "content": assistant_reply})
-        
+
+        # Save the conversation history back
         user_conversations[user_id] = conversation_history
-        
+
         return assistant_reply
     except Exception as e:
         logging.error(f"Error while getting response from OpenAI: {e}")
