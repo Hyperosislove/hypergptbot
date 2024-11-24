@@ -9,8 +9,9 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # Function to generate AI response
 async def chat_with_ai(prompt: str) -> str:
     try:
+        # Using gpt-3.5-turbo instead of gpt-4
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",  # Updated model
             messages=[{"role": "user", "content": prompt}]
         )
         return response['choices'][0]['message']['content'].strip()
